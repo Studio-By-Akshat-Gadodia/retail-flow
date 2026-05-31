@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { useInstallPrompt } from "@/shared/hooks/useInstallPrompt";
-import { cn } from "@/shared/utils/cn";
 import { WifiOff, RefreshCw, Download, X } from "lucide-react";
 
 function OfflineBanner() {

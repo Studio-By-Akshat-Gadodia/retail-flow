@@ -11,7 +11,6 @@ import Avatar from "@/shared/components/ui/Avatar";
 import Badge from "@/shared/components/ui/Badge";
 import Button from "@/shared/components/ui/Button";
 import AddMemberModal from "@/features/stores/components/AddMemberModal";
-import { cn } from "@/shared/utils/cn";
 import type { BadgeTone } from "@/shared/components/ui/Badge";
 
 const ROLE_TONE: Record<StoreRole, BadgeTone> = {
