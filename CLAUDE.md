@@ -53,6 +53,20 @@ Per-domain-app `CLAUDE.md` files (e.g. `backend/stock/CLAUDE.md`) will be added 
 - **Inventory accuracy is non-negotiable.** Stock-quantity mutations must be transactional. See `backend/CLAUDE.md` (Domain notes) and the future `backend/stock/CLAUDE.md`.
 - **PWA offline-first** for the warehouse floor (spotty wifi). Stock updates queue locally and sync. See `frontend/CLAUDE.md`.
 
+## Branching & workflow
+
+- **Every change starts from a Jira ticket.** No branch without a ticket. Use the ticket key in the branch name (e.g. `RETAIL-123-low-stock-alerts`).
+- **Promotion flow** — each step is its own PR:
+
+  ```
+  <ticket-branch>  →  release/dev    (stage)
+  release/dev      →  release/uat    (UAT)
+  release/uat      →  release/prod   (production)
+  ```
+
+- Each `release/*` branch corresponds to one deployed environment. **Never merge a feature branch directly into `release/uat` or `release/prod`** — always promote through the chain so what runs in prod is the same code that passed UAT.
+- Reference the Jira key in PR titles (e.g. `RETAIL-123: add low-stock alerts`) so reviewers can jump to the ticket in one click.
+
 ## Suggested Django apps
 
 - `core/` — shared utilities. No API surface of its own.
