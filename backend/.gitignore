@@ -1,0 +1,48 @@
+# ── Python ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+wheels/
+
+# ── Virtual envs ────────────────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+
+# ── Django ──────────────────────────────────────────────────
+db.sqlite3
+db.sqlite3-journal
+staticfiles/
+mediafiles/
+media/
+local_settings.py
+
+# ── Secrets ─────────────────────────────────────────────────
+.env
+# .sample.env is intentionally NOT ignored — it ships with the repo
+
+# ── Testing / coverage ──────────────────────────────────────
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+nosetests.xml
+*.coveragerc
+
+# ── Type checkers / linters ─────────────────────────────────
+.mypy_cache/
+.dmypy.json
+.ruff_cache/
+
+# ── Logs ────────────────────────────────────────────────────
+*.log
+logs/
