@@ -76,6 +76,15 @@ class CreateStoreSerializer(serializers.ModelSerializer):
         model  = Store
         fields = ("name", "description", "currency", "timezone")
 
+    def validate_name(self, value):
+        user = self.context["request"].user
+        qs = Store.objects.filter(name__iexact=value, created_by=user)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("You already have a store with this name.")
+        return value
+
     @transaction.atomic
     def create(self, validated_data):
         user  = self.context["request"].user

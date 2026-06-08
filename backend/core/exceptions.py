@@ -1,14 +1,3 @@
-from rest_framework.views import exception_handler
-from core.responses import APIResponse
+from core.rest_framework.exceptions import global_exception_handler
 
-
-def global_exception_handler(exc, context):
-    response = exception_handler(exc, context)
-
-    if response is not None:
-        return APIResponse.failed(data=response.data, status_code=response.status_code)
-
-    return APIResponse.failed(
-        data={"detail": "An unexpected error occurred."},
-        status_code=500,
-    )
+__all__ = ['global_exception_handler']

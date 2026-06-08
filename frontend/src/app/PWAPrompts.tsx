@@ -1,30 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { useInstallPrompt } from "@/shared/hooks/useInstallPrompt";
-import { WifiOff, RefreshCw, Download, X } from "lucide-react";
-
-function OfflineBanner() {
-  const [online, setOnline] = useState(() => navigator.onLine);
-
-  useEffect(() => {
-    const on  = () => setOnline(true);
-    const off = () => setOnline(false);
-    window.addEventListener("online",  on);
-    window.addEventListener("offline", off);
-    return () => {
-      window.removeEventListener("online",  on);
-      window.removeEventListener("offline", off);
-    };
-  }, []);
-
-  if (online) return null;
-  return (
-    <div className="fixed top-0 inset-x-0 z-50 flex items-center justify-center gap-2 bg-warning px-4 py-2 text-white text-sm shadow">
-      <WifiOff className="h-4 w-4 shrink-0" />
-      <span>You're offline — stock updates will sync when you reconnect.</span>
-    </div>
-  );
-}
+import { RefreshCw, Download, X } from "lucide-react";
 
 function UpdateToast({ onUpdate }: { onUpdate: () => void }) {
   return (
@@ -73,7 +50,6 @@ export default function PWAPrompts() {
 
   return (
     <>
-      <OfflineBanner />
       {needRefresh && (
         <UpdateToast onUpdate={() => updateServiceWorker(true)} />
       )}
