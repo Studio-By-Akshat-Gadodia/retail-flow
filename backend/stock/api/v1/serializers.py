@@ -12,7 +12,7 @@ class StockMovementSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class StockInSerializer(serializers.Serializer):
+class _BaseStockSerializer(serializers.Serializer):
     product_id = serializers.PrimaryKeyRelatedField(
         queryset=Product.objects.filter(is_active=True)
     )
@@ -24,3 +24,18 @@ class StockInSerializer(serializers.Serializer):
         if not StoreMember.objects.filter(store=product.store, user=user).exists():
             raise serializers.ValidationError("You are not a member of this store.")
         return product
+
+
+class StockInSerializer(_BaseStockSerializer):
+    pass
+
+
+class StockOutSerializer(_BaseStockSerializer):
+    def validate(self, attrs):
+        product  = attrs["product_id"]
+        quantity = attrs["quantity"]
+        if product.quantity < quantity:
+            raise serializers.ValidationError(
+                {"quantity": f"Only {product.quantity} unit(s) available."}
+            )
+        return attrs

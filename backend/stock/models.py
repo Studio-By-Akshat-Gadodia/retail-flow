@@ -2,8 +2,12 @@ from django.db import models
 
 
 class StockMovement(models.Model):
-    STOCK_IN = "stock_in"
-    TYPE_CHOICES = [(STOCK_IN, "Stock In")]
+    STOCK_IN  = "stock_in"
+    STOCK_OUT = "stock_out"
+    TYPE_CHOICES = [
+        (STOCK_IN,  "Stock In"),
+        (STOCK_OUT, "Stock Out"),
+    ]
 
     product       = models.ForeignKey(
         "products.Product",

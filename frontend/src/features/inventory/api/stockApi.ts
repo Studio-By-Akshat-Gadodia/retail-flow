@@ -16,9 +16,16 @@ export interface StockInPayload {
   notes?:     string;
 }
 
+export type StockOutPayload = StockInPayload;
+
 export const stockApi = {
   stockIn: (payload: StockInPayload) =>
     apiClient
       .post<StockMovement>("/stock/in/", payload)
+      .then((r) => r.data as unknown as StockMovement),
+
+  stockOut: (payload: StockOutPayload) =>
+    apiClient
+      .post<StockMovement>("/stock/out/", payload)
       .then((r) => r.data as unknown as StockMovement),
 };
