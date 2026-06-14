@@ -49,3 +49,12 @@ class ProductDetailView(APIView):
             return APIResponse.failed(data=serializer.errors)
         product = serializer.save()
         return APIResponse.success(data=ProductSerializer(product).data)
+
+    @extend_schema(tags=["products"])
+    def delete(self, request, pk):
+        product = self._get_product(pk)
+        if not StoreMember.objects.filter(store=product.store, user=request.user).exists():
+            return APIResponse.failed(data={"detail": "Not a member of this store."}, status_code=403)
+        product.is_active = False
+        product.save(update_fields=["is_active"])
+        return APIResponse.success(data=None, status_code=204)

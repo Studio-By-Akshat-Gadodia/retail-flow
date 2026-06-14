@@ -26,3 +26,11 @@ export function useUpdateProduct(storeId: number) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["products", storeId] }),
   });
 }
+
+export function useDeleteProduct(storeId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => productsApi.remove(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["products", storeId] }),
+  });
+}
