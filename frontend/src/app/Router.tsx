@@ -7,6 +7,7 @@ import StoresPage from "@/pages/StoresPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ProductsPage from "@/pages/ProductsPage";
 import StockPage from "@/pages/StockPage";
+import ReportsPage from "@/pages/ReportsPage";
 import DashboardLayout from "@/layouts/DashboardLayout";
 
 /* ── Guards ───────────────────────────────────────────── */
@@ -48,7 +49,7 @@ function AppShell() {
             <Route path={ROUTES.SUPPLIERS} element={<Soon title="Suppliers" />} />
             <Route path={ROUTES.SALES}     element={<Soon title="Sales" />} />
             <Route path={ROUTES.ALERTS}    element={<Soon title="Alerts" />} />
-            <Route path={ROUTES.REPORTS}   element={<Soon title="Reports" />} />
+            <Route path={ROUTES.REPORTS}   element={<ReportsPage />} />
             <Route path={ROUTES.SETTINGS}  element={<SettingsPage />} />
             <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} replace />} />
           </Routes>
