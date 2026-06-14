@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Package, Plus } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Package, Plus, Search, X } from "lucide-react";
 import { useStoreContext } from "@/features/stores/context/StoreContext";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import Button from "@/shared/components/ui/Button";
@@ -11,13 +11,40 @@ import AddProductForm from "@/features/products/components/AddProductForm";
 export default function ProductsPage() {
   const { currentStore } = useStoreContext();
   const [addOpen, setAddOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const { data: products = [], isLoading } = useProducts(currentStore?.id ?? 0);
+
+  const categories = useMemo(
+    () => [...new Set(products.map((p) => p.category))].sort(),
+    [products],
+  );
+
+  const filtered = useMemo(() => {
+    const term = search.toLowerCase();
+    return products.filter((p) => {
+      const matchesSearch =
+        !term ||
+        p.name.toLowerCase().includes(term) ||
+        p.sku.toLowerCase().includes(term);
+      const matchesCategory = !selectedCategory || p.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [products, search, selectedCategory]);
+
+  const hasFilters = !!search || !!selectedCategory;
+
+  function clearFilters() {
+    setSearch("");
+    setSelectedCategory("");
+  }
 
   if (!currentStore) return null;
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-fg">Products</h1>
@@ -31,6 +58,56 @@ export default function ProductsPage() {
         </Button>
       </div>
 
+      {/* Search + category filter — only shown once data is loaded */}
+      {!isLoading && products.length > 0 && (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute inset-y-0 left-3 my-auto h-4 w-4 text-muted" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name or SKU…"
+              className="h-9 w-full rounded-md border border-border bg-bg pl-9 pr-9 text-sm text-fg shadow-card placeholder:text-muted hover:border-border-strong focus:border-fg focus:outline-none focus:ring-2 focus:ring-accent/20"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute inset-y-0 right-2 my-auto flex h-5 w-5 items-center justify-center rounded text-muted hover:text-fg"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Category filter */}
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="h-9 rounded-md border border-border bg-bg px-3 text-sm text-fg shadow-card hover:border-border-strong focus:border-fg focus:outline-none focus:ring-2 focus:ring-accent/20 sm:w-48"
+          >
+            <option value="">All categories</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+
+          {/* Clear */}
+          {hasFilters && (
+            <button
+              onClick={clearFilters}
+              className="text-sm text-muted hover:text-fg transition-colors whitespace-nowrap"
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Loading skeletons */}
       {isLoading && (
         <div className="space-y-2">
           {[...Array(3)].map((_, i) => (
@@ -39,6 +116,7 @@ export default function ProductsPage() {
         </div>
       )}
 
+      {/* Empty catalog */}
       {!isLoading && products.length === 0 && (
         <Card>
           <CardBody className="py-12 text-center">
@@ -57,9 +135,30 @@ export default function ProductsPage() {
         </Card>
       )}
 
-      {!isLoading && products.length > 0 && (
+      {/* No results from filter */}
+      {!isLoading && products.length > 0 && filtered.length === 0 && (
+        <Card>
+          <CardBody className="py-10 text-center">
+            <Search className="mx-auto mb-3 h-8 w-8 text-muted" />
+            <h2 className="text-sm font-semibold text-fg">No products found</h2>
+            <p className="mt-1 text-sm text-muted">
+              No products match your search. Try a different term or{" "}
+              <button
+                onClick={clearFilters}
+                className="text-accent hover:underline"
+              >
+                clear the filters
+              </button>
+              .
+            </p>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Product list */}
+      {!isLoading && filtered.length > 0 && (
         <div className="space-y-2">
-          {products.map((product) => (
+          {filtered.map((product) => (
             <div
               key={product.id}
               className="flex items-center gap-4 rounded-lg border border-border bg-bg px-4 py-3 shadow-card"
