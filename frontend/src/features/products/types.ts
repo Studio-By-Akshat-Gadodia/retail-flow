@@ -21,3 +21,12 @@ export interface CreateProductPayload {
   unit_price:    string | number;
   reorder_level: number;
 }
+
+export interface UpdateProductPayload {
+  name?:          string;
+  sku?:           string;
+  category?:      string;
+  quantity?:      number;
+  unit_price?:    string | number;
+  reorder_level?: number;
+}

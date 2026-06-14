@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Package, Plus, Search, X } from "lucide-react";
+import { Package, Pencil, Plus, Search, X } from "lucide-react";
 import { useStoreContext } from "@/features/stores/context/StoreContext";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import Button from "@/shared/components/ui/Button";
@@ -7,10 +7,13 @@ import { Card, CardBody } from "@/shared/components/ui/Card";
 import Badge from "@/shared/components/ui/Badge";
 import Dialog from "@/shared/components/ui/Dialog";
 import AddProductForm from "@/features/products/components/AddProductForm";
+import EditProductForm from "@/features/products/components/EditProductForm";
+import type { Product } from "@/features/products/types";
 
 export default function ProductsPage() {
   const { currentStore } = useStoreContext();
   const [addOpen, setAddOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
@@ -58,10 +61,9 @@ export default function ProductsPage() {
         </Button>
       </div>
 
-      {/* Search + category filter — only shown once data is loaded */}
+      {/* Search + category filter */}
       {!isLoading && products.length > 0 && (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          {/* Search */}
           <div className="relative flex-1">
             <Search className="pointer-events-none absolute inset-y-0 left-3 my-auto h-4 w-4 text-muted" />
             <input
@@ -81,7 +83,6 @@ export default function ProductsPage() {
             )}
           </div>
 
-          {/* Category filter */}
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
@@ -95,7 +96,6 @@ export default function ProductsPage() {
             ))}
           </select>
 
-          {/* Clear */}
           {hasFilters && (
             <button
               onClick={clearFilters}
@@ -143,10 +143,7 @@ export default function ProductsPage() {
             <h2 className="text-sm font-semibold text-fg">No products found</h2>
             <p className="mt-1 text-sm text-muted">
               No products match your search. Try a different term or{" "}
-              <button
-                onClick={clearFilters}
-                className="text-accent hover:underline"
-              >
+              <button onClick={clearFilters} className="text-accent hover:underline">
                 clear the filters
               </button>
               .
@@ -177,19 +174,44 @@ export default function ProductsPage() {
                   SKU: {product.sku} · {product.category}
                 </p>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-semibold text-fg">
-                  ${parseFloat(product.unit_price).toFixed(2)}
-                </p>
-                <p className="mt-0.5 text-xs text-muted">Qty: {product.quantity}</p>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-sm font-semibold text-fg">
+                    ${parseFloat(product.unit_price).toFixed(2)}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted">Qty: {product.quantity}</p>
+                </div>
+                <button
+                  onClick={() => setEditingProduct(product)}
+                  className="rounded-md p-1.5 text-muted hover:bg-surface hover:text-fg transition-colors"
+                  aria-label={`Edit ${product.name}`}
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
               </div>
             </div>
           ))}
         </div>
       )}
 
+      {/* Add dialog */}
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} title="Add a product">
         <AddProductForm storeId={currentStore.id} onSuccess={() => setAddOpen(false)} />
+      </Dialog>
+
+      {/* Edit dialog */}
+      <Dialog
+        open={!!editingProduct}
+        onClose={() => setEditingProduct(null)}
+        title="Edit product"
+      >
+        {editingProduct && (
+          <EditProductForm
+            product={editingProduct}
+            storeId={currentStore.id}
+            onSuccess={() => setEditingProduct(null)}
+          />
+        )}
       </Dialog>
     </div>
   );

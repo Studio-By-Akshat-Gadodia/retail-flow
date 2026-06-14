@@ -35,3 +35,17 @@ class CreateProductSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Product.objects.create(created_by=self.context["request"].user, **validated_data)
+
+
+class UpdateProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = Product
+        fields = ("name", "sku", "category", "quantity", "unit_price", "reorder_level")
+
+    def validate_sku(self, value):
+        qs = Product.objects.filter(store=self.instance.store, sku=value, is_active=True)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("A product with this SKU already exists in this store.")
+        return value
