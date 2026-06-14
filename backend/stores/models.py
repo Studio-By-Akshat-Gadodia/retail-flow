@@ -39,6 +39,7 @@ class Store(models.Model):
 
     class Meta:
         ordering = ["name"]
+        unique_together = [("name", "created_by")]
 
     def __str__(self):
         return self.name

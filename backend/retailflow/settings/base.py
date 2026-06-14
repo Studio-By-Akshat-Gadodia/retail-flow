@@ -13,6 +13,11 @@ ALLOWED_HOSTS = config(
 )
 
 INSTALLED_APPS = [
+    # django-unfold — must come before django.contrib.admin
+    'unfold',
+    'unfold.contrib.filters',
+    'unfold.contrib.forms',
+    'unfold.contrib.inlines',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -29,6 +34,9 @@ INSTALLED_APPS = [
     "core",
     "users",
     "stores",
+    "products",
+    "stock",
+    "communication",
 ]
 
 MIDDLEWARE = [
@@ -41,6 +49,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "core.middleware.CurrentRequestMiddleware",
 ]
 
 ROOT_URLCONF = "retailflow.urls"
@@ -124,9 +133,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
-    default="http://localhost:3000",
+    default="http://localhost:5173",
     cast=lambda v: [s.strip() for s in v.split(",")],
 )
+CORS_ALLOW_CREDENTIALS = True
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(
@@ -139,3 +149,33 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
+
+# ── Google OAuth2 ──────────────────────────────────────────────────────────────
+GOOGLE_CLIENT_ID = config('GOOGLE_CLIENT_ID', default='')
+
+# ── Security headers (production only) ────────────────────────────────────────
+if not DEBUG:
+    SECURE_SSL_REDIRECT              = True
+    SECURE_HSTS_SECONDS              = 31_536_000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS   = True
+    SECURE_HSTS_PRELOAD              = True
+    SESSION_COOKIE_SECURE            = True
+    CSRF_COOKIE_SECURE               = True
+    SECURE_CONTENT_TYPE_NOSNIFF      = True
+    X_FRAME_OPTIONS                  = 'DENY'
+    SECURE_REFERRER_POLICY           = 'strict-origin-when-cross-origin'
+
+# ── Celery ────────────────────────────────────────────────────────────────────
+CELERY_BROKER_URL                     = config('CELERY_BROKER_URL',     default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND                 = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/1')
+CELERY_ACCEPT_CONTENT                 = ['json']
+CELERY_TASK_SERIALIZER                = 'json'
+CELERY_RESULT_SERIALIZER              = 'json'
+CELERY_TIMEZONE                       = TIME_ZONE
+CELERY_TASK_TRACK_STARTED             = True
+CELERY_TASK_TIME_LIMIT                = 300
+CELERY_TASK_SOFT_TIME_LIMIT           = 240
+CELERY_WORKER_PREFETCH_MULTIPLIER     = 1
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True

@@ -2,8 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Inter';
+  font-display: optional;
+  src: local('Inter');
+}
+
 /* ── Light theme (default) ──────────────────────────────── */
 :root {
+  color-scheme: light;
+  -webkit-tap-highlight-color: transparent;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'ss01';
+
   --color-bg:             0 0% 100%;
   --color-surface:        220 14% 98%;
   --color-surface-2:      220 13% 95%;
@@ -26,6 +36,8 @@
 
 /* ── Dark theme ──────────────────────────────────────────── */
 :root[data-theme='dark'] {
+  color-scheme: dark;
+
   --color-bg:             222 28% 8%;
   --color-surface:        222 24% 11%;
   --color-surface-2:      222 20% 16%;
@@ -61,12 +73,24 @@ input, select, textarea, button { font: inherit; color: inherit; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
+/* ── Skeleton shimmer ────────────────────────────────────── */
 .skeleton {
   @apply relative overflow-hidden bg-surface-2;
 }
 .skeleton::after {
   content: "";
-  @apply absolute inset-0;
-  background: linear-gradient(90deg, transparent, hsl(var(--color-border) / 0.5), transparent);
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--color-fg) / 0.07) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
   animation: shimmer 1.6s infinite;
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
 }

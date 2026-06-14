@@ -1,0 +1,155 @@
+RetailFlow — Module-wise Feature ToDo
+======================================
+
+Build order: Products → Stock → Suppliers → Sales → Alerts → Reports → Exports → Settings
+
+
+════════════════════════════════════════
+MODULE 1 — Product Catalog (products)
+════════════════════════════════════════
+
+Backend (products Django app):
+  [ ] Category model — name, slug, parent (self-FK for sub-categories)
+  [ ] Product model — name, SKU, barcode, description, category, images,
+                       unit, cost_price, selling_price, tax_rate, is_active
+  [ ] CRUD endpoints for Category
+  [ ] CRUD endpoints for Product
+  [ ] Search/filter by name, SKU, category
+  [ ] Barcode lookup endpoint (for scanner)
+
+Frontend (features/products):
+  [ ] Product list with search + filter by category
+  [ ] Product detail / edit form
+  [ ] Create product form with image upload
+  [ ] Category management (tree view)
+  [ ] Barcode display per product (QR/barcode)
+
+
+════════════════════════════════════════
+MODULE 2 — Inventory / Stock (stock)
+════════════════════════════════════════
+
+Backend (stock Django app):
+  [ ] StockLevel model — product + store → quantity (one row per product per store)
+  [ ] StockMovement model — type (purchase/sale/adjustment/transfer),
+                             delta, performed_by, reference, created_at
+  [ ] Service layer with select_for_update() for all quantity mutations
+  [ ] Endpoints: current stock per store, stock history, bulk adjustment,
+                  receive stock (PO-based), transfer between stores
+
+Frontend (features/inventory):
+  [ ] Stock level list (filterable, sortable by quantity)
+  [ ] Inline quantity adjustment with reason selector
+  [ ] Receive stock form (linked to supplier PO)
+  [ ] Stock movement history timeline per product
+  [ ] Offline queue integration — adjustments replay on reconnect
+
+
+════════════════════════════════════════
+MODULE 3 — Suppliers (suppliers)
+════════════════════════════════════════
+
+Backend (suppliers Django app):
+  [ ] Supplier model — name, contact person, email, phone, address,
+                        payment terms, lead time days
+  [ ] PurchaseOrder model — supplier, store, status (draft/sent/received/cancelled),
+                              line items, expected delivery date
+  [ ] PurchaseOrderItem model — product, qty ordered, qty received, unit cost
+  [ ] On PO receive → atomic stock movement trigger
+
+Frontend (features/suppliers):
+  [ ] Supplier list + CRUD
+  [ ] Purchase order list per supplier
+  [ ] Create/edit PO with line item table
+  [ ] "Mark received" flow — confirms quantities, writes stock movements
+
+
+════════════════════════════════════════
+MODULE 4 — Sales (sales)
+════════════════════════════════════════
+
+Backend (sales Django app):
+  [ ] Sale model — store, customer (optional), total, discount, tax,
+                    payment method, completed_at
+  [ ] SaleItem model — product, qty, unit price snapshot (not live FK)
+  [ ] On sale complete → atomic stock decrement via service layer
+  [ ] SaleReturn model — reverses stock movement on refund
+
+Frontend (features/sales):
+  [ ] Sales list with date-range filter
+  [ ] Sale detail (receipt view)
+  [ ] Quick-add sale form (POS-style)
+  [ ] Return/refund flow
+
+
+════════════════════════════════════════
+MODULE 5 — Low-Stock Alerts (alerts)
+════════════════════════════════════════
+
+Backend (alerts Django app):
+  [ ] AlertRule model — product, store, threshold quantity, enabled flag
+  [ ] AlertEvent model — rule, triggered_at, current_qty, acknowledged_at, acknowledged_by
+  [ ] Celery task — runs post-stock-movement (or scheduled), compares qty to threshold
+  [ ] Hook into communication app for email/push notifications on trigger
+
+Frontend (features/alerts):
+  [ ] Alert rules list — set threshold per product per store
+  [ ] Alert inbox — unread events with acknowledge action
+  [ ] Unread badge count on nav item
+
+
+════════════════════════════════════════
+MODULE 6 — Reports (reports)
+════════════════════════════════════════
+
+Backend (aggregation endpoints, no new models):
+  [ ] Sales summary — revenue, units sold, avg order value (by day/week/month)
+  [ ] Top products by revenue and by units sold
+  [ ] Stock value snapshot (current qty × cost price)
+  [ ] Low-stock report (products below threshold)
+  [ ] Slow-moving inventory report (no movement in N days)
+
+Frontend (features/reports):
+  [ ] KPI cards — today's revenue, total orders, stock value
+  [ ] Revenue chart (line/bar, time-bucketed)
+  [ ] Top products table
+  [ ] Slow-movers table
+
+
+════════════════════════════════════════
+MODULE 7 — Exports (exports)
+════════════════════════════════════════
+
+Backend (exports Django app):
+  [ ] ExportJob model — type, status, store, filters, file_url, created_by
+  [ ] Celery tasks for async CSV and PDF generation
+  [ ] Endpoints: trigger export, poll status, download link
+  [ ] Export targets: stock report, sales report, product catalog, movement history
+
+Frontend (features/reports, same UI):
+  [ ] "Export CSV / PDF" button on each report view
+  [ ] Export jobs list with download links
+  [ ] Polling / SSE for export job status
+
+
+════════════════════════════════════════
+MODULE 8 — Settings & User Profile
+════════════════════════════════════════
+
+Backend:
+  [ ] Change password endpoint
+  [ ] Update profile endpoint (name, avatar)
+  [ ] Store settings endpoint (currency, timezone, logo)
+  [ ] Notification preferences (via communication.CommunicationPreferences)
+
+Frontend (features/settings, pages/SettingsPage):
+  [ ] Profile edit form
+  [ ] Change password form
+  [ ] Store settings form (currency, timezone, logo upload)
+  [ ] Notification preference toggles per communication trigger
+
+
+
+-----
+User need to add product variants
+Creat Authorization (Roles)

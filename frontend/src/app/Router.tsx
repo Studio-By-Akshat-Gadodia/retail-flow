@@ -5,6 +5,8 @@ import { useStoreContext } from "@/features/stores/context/StoreContext";
 import LoginPage from "@/pages/LoginPage";
 import StoresPage from "@/pages/StoresPage";
 import SettingsPage from "@/pages/SettingsPage";
+import ProductsPage from "@/pages/ProductsPage";
+import StockPage from "@/pages/StockPage";
 import DashboardLayout from "@/layouts/DashboardLayout";
 
 /* ── Guards ───────────────────────────────────────────── */
@@ -41,8 +43,8 @@ function AppShell() {
         <DashboardLayout>
           <Routes>
             <Route path={ROUTES.DASHBOARD} element={<Soon title="Overview" />} />
-            <Route path={ROUTES.PRODUCTS}  element={<Soon title="Products" />} />
-            <Route path={ROUTES.STOCK}     element={<Soon title="Inventory" />} />
+            <Route path={ROUTES.PRODUCTS}  element={<ProductsPage />} />
+            <Route path={ROUTES.STOCK}     element={<StockPage />} />
             <Route path={ROUTES.SUPPLIERS} element={<Soon title="Suppliers" />} />
             <Route path={ROUTES.SALES}     element={<Soon title="Sales" />} />
             <Route path={ROUTES.ALERTS}    element={<Soon title="Alerts" />} />
