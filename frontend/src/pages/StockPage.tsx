@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowDownToLine, Package, Plus } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, Package } from "lucide-react";
 import { useStoreContext } from "@/features/stores/context/StoreContext";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import Button from "@/shared/components/ui/Button";
@@ -7,10 +7,12 @@ import { Card, CardBody } from "@/shared/components/ui/Card";
 import Badge from "@/shared/components/ui/Badge";
 import Dialog from "@/shared/components/ui/Dialog";
 import StockInForm from "@/features/inventory/components/StockInForm";
+import StockOutForm from "@/features/inventory/components/StockOutForm";
 
 export default function StockPage() {
   const { currentStore } = useStoreContext();
-  const [stockInOpen, setStockInOpen] = useState(false);
+  const [stockInOpen,  setStockInOpen]  = useState(false);
+  const [stockOutOpen, setStockOutOpen] = useState(false);
 
   const { data: products = [], isLoading } = useProducts(currentStore?.id ?? 0);
 
@@ -26,10 +28,16 @@ export default function StockPage() {
             {products.length} product{products.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button onClick={() => setStockInOpen(true)}>
-          <Plus className="h-4 w-4" />
-          Record stock in
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={() => setStockOutOpen(true)}>
+            <ArrowUpFromLine className="h-4 w-4" />
+            Stock out
+          </Button>
+          <Button onClick={() => setStockInOpen(true)}>
+            <ArrowDownToLine className="h-4 w-4" />
+            Stock in
+          </Button>
+        </div>
       </div>
 
       {/* Loading skeletons */}
@@ -101,6 +109,23 @@ export default function StockPage() {
           products={products}
           storeId={currentStore.id}
           onSuccess={() => setStockInOpen(false)}
+        />
+      </Dialog>
+
+      {/* Stock-out dialog */}
+      <Dialog
+        open={stockOutOpen}
+        onClose={() => setStockOutOpen(false)}
+        title="Record stock out"
+      >
+        <div className="mb-4 flex items-center gap-2 rounded-lg bg-danger-soft px-3 py-2">
+          <ArrowUpFromLine className="h-4 w-4 shrink-0 text-danger" />
+          <p className="text-sm text-danger">The product's quantity will decrease. You cannot go below zero.</p>
+        </div>
+        <StockOutForm
+          products={products}
+          storeId={currentStore.id}
+          onSuccess={() => setStockOutOpen(false)}
         />
       </Dialog>
     </div>
