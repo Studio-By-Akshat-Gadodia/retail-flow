@@ -147,3 +147,8 @@ Frontend (features/settings, pages/SettingsPage):
   [ ] Change password form
   [ ] Store settings form (currency, timezone, logo upload)
   [ ] Notification preference toggles per communication trigger
+
+
+
+-----
+User need to add product variants
