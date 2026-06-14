@@ -16,4 +16,6 @@ export const productsApi = {
     apiClient
       .patch<Product>(`/products/${id}/`, payload)
       .then((r) => r.data as unknown as Product),
+
+  remove: (id: number) => apiClient.delete(`/products/${id}/`),
 };

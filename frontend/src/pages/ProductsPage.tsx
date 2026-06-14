@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import { Package, Pencil, Plus, Search, X } from "lucide-react";
+import { Package, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { useStoreContext } from "@/features/stores/context/StoreContext";
-import { useProducts } from "@/features/products/hooks/useProducts";
+import { useProducts, useDeleteProduct } from "@/features/products/hooks/useProducts";
 import Button from "@/shared/components/ui/Button";
 import { Card, CardBody } from "@/shared/components/ui/Card";
 import Badge from "@/shared/components/ui/Badge";
@@ -14,10 +14,12 @@ export default function ProductsPage() {
   const { currentStore } = useStoreContext();
   const [addOpen, setAddOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
   const { data: products = [], isLoading } = useProducts(currentStore?.id ?? 0);
+  const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct(currentStore?.id ?? 0);
 
   const categories = useMemo(
     () => [...new Set(products.map((p) => p.category))].sort(),
@@ -188,6 +190,13 @@ export default function ProductsPage() {
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
+                <button
+                  onClick={() => setDeletingProduct(product)}
+                  className="rounded-md p-1.5 text-muted hover:bg-danger-soft hover:text-danger transition-colors"
+                  aria-label={`Delete ${product.name}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </div>
             </div>
           ))}
@@ -211,6 +220,45 @@ export default function ProductsPage() {
             storeId={currentStore.id}
             onSuccess={() => setEditingProduct(null)}
           />
+        )}
+      </Dialog>
+
+      {/* Delete confirmation dialog */}
+      <Dialog
+        open={!!deletingProduct}
+        onClose={() => setDeletingProduct(null)}
+        title="Remove product"
+      >
+        {deletingProduct && (
+          <div className="space-y-4">
+            <p className="text-sm text-muted">
+              Are you sure you want to remove{" "}
+              <span className="font-medium text-fg">{deletingProduct.name}</span>? It will
+              disappear from the catalog and reports.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="secondary"
+                className="flex-1"
+                onClick={() => setDeletingProduct(null)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                className="flex-1"
+                loading={isDeleting}
+                onClick={() =>
+                  deleteProduct(deletingProduct.id, {
+                    onSuccess: () => setDeletingProduct(null),
+                  })
+                }
+              >
+                Remove product
+              </Button>
+            </div>
+          </div>
         )}
       </Dialog>
     </div>
