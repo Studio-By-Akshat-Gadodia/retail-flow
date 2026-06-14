@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { productsApi } from "@/features/products/api/productsApi";
 import type { CreateProductPayload, UpdateProductPayload } from "@/features/products/types";
@@ -8,6 +9,11 @@ export function useProducts(storeId: number) {
     queryFn:  () => productsApi.list(storeId),
     enabled:  !!storeId,
   });
+}
+
+export function useLowStockCount(storeId: number): number {
+  const { data: products = [] } = useProducts(storeId);
+  return useMemo(() => products.filter((p) => p.is_low_stock).length, [products]);
 }
 
 export function useCreateProduct(storeId: number) {
