@@ -6,6 +6,7 @@ export interface Product {
   quantity:      number;
   unit_price:    string;
   reorder_level: number;
+  is_low_stock:  boolean;
   store:         number;
   is_active:     boolean;
   created_at:    string;

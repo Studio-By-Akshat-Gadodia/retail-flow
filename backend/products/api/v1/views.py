@@ -20,6 +20,9 @@ class ProductListCreateView(APIView):
         if not StoreMember.objects.filter(store_id=store_id, user=request.user).exists():
             return APIResponse.failed(data={"detail": "Not a member of this store."}, status_code=403)
         products = Product.objects.filter(store_id=store_id, is_active=True)
+        if request.query_params.get("low_stock") == "true":
+            from django.db.models import F
+            products = products.filter(quantity__lte=F("reorder_level"))
         return APIResponse.success(data=ProductSerializer(products, many=True).data)
 
     @extend_schema(request=CreateProductSerializer, responses={201: ProductSerializer}, tags=["products"])

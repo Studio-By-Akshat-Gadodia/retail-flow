@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowDownToLine, ArrowUpFromLine, Package } from "lucide-react";
+import { useMemo, useState } from "react";
+import { AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Package } from "lucide-react";
 import { useStoreContext } from "@/features/stores/context/StoreContext";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import Button from "@/shared/components/ui/Button";
@@ -15,6 +15,11 @@ export default function StockPage() {
   const [stockOutOpen, setStockOutOpen] = useState(false);
 
   const { data: products = [], isLoading } = useProducts(currentStore?.id ?? 0);
+
+  const lowStockProducts = useMemo(
+    () => products.filter((p) => p.is_low_stock),
+    [products],
+  );
 
   if (!currentStore) return null;
 
@@ -49,6 +54,32 @@ export default function StockPage() {
         </div>
       )}
 
+      {/* Low-stock summary panel */}
+      {!isLoading && lowStockProducts.length > 0 && (
+        <div className="rounded-xl border border-danger/30 bg-danger-soft p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 shrink-0 text-danger" />
+            <p className="text-sm font-semibold text-danger">
+              {lowStockProducts.length} product{lowStockProducts.length !== 1 ? "s" : ""} need restocking
+            </p>
+          </div>
+          <div className="space-y-2">
+            {lowStockProducts.map((product) => (
+              <div key={product.id} className="flex items-center justify-between rounded-lg bg-bg px-3 py-2">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-fg">{product.name}</p>
+                  <p className="text-xs text-muted">SKU: {product.sku}</p>
+                </div>
+                <div className="ml-4 text-right shrink-0">
+                  <p className="text-sm font-semibold text-danger">{product.quantity}</p>
+                  <p className="text-xs text-muted">reorder at {product.reorder_level}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Empty state */}
       {!isLoading && products.length === 0 && (
         <Card>
@@ -78,7 +109,7 @@ export default function StockPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate text-sm font-medium text-fg">{product.name}</p>
-                  {product.quantity <= product.reorder_level && (
+                  {product.is_low_stock && (
                     <Badge tone="danger">Low stock</Badge>
                   )}
                 </div>
