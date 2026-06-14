@@ -14,3 +14,9 @@ desktop.ini
 .env
 *.pem
 *.key
+
+# Generated systemd service files
+deployment/services/*.service
+
+# Keep templates
+!deployment/services/*.service.template
