@@ -5,14 +5,20 @@ from stores.models import Store, StoreMember
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    is_low_stock = serializers.SerializerMethodField()
+
+    def get_is_low_stock(self, obj) -> bool:
+        return obj.quantity <= obj.reorder_level
+
     class Meta:
         model  = Product
         fields = (
             "id", "name", "sku", "category",
             "quantity", "unit_price", "reorder_level",
+            "is_low_stock",
             "store", "is_active", "created_at", "updated_at",
         )
-        read_only_fields = ("id", "store", "is_active", "created_at", "updated_at")
+        read_only_fields = ("id", "is_low_stock", "store", "is_active", "created_at", "updated_at")
 
 
 class CreateProductSerializer(serializers.ModelSerializer):

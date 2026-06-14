@@ -168,7 +168,7 @@ export default function ProductsPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <p className="truncate text-sm font-medium text-fg">{product.name}</p>
-                  {product.quantity <= product.reorder_level && (
+                  {product.is_low_stock && (
                     <Badge tone="danger">Low stock</Badge>
                   )}
                 </div>
