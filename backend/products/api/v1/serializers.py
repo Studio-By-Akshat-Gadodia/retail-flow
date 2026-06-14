@@ -5,14 +5,20 @@ from stores.models import Store, StoreMember
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    is_low_stock = serializers.SerializerMethodField()
+
+    def get_is_low_stock(self, obj) -> bool:
+        return obj.quantity <= obj.reorder_level
+
     class Meta:
         model  = Product
         fields = (
             "id", "name", "sku", "category",
             "quantity", "unit_price", "reorder_level",
+            "is_low_stock",
             "store", "is_active", "created_at", "updated_at",
         )
-        read_only_fields = ("id", "store", "is_active", "created_at", "updated_at")
+        read_only_fields = ("id", "is_low_stock", "store", "is_active", "created_at", "updated_at")
 
 
 class CreateProductSerializer(serializers.ModelSerializer):
@@ -35,3 +41,17 @@ class CreateProductSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return Product.objects.create(created_by=self.context["request"].user, **validated_data)
+
+
+class UpdateProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = Product
+        fields = ("name", "sku", "category", "quantity", "unit_price", "reorder_level")
+
+    def validate_sku(self, value):
+        qs = Product.objects.filter(store=self.instance.store, sku=value, is_active=True)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("A product with this SKU already exists in this store.")
+        return value

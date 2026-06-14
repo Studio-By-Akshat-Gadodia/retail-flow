@@ -2,7 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FRONTEND_DIR="$SCRIPT_DIR/../frontend"
+FRONTEND_DIR="$SCRIPT_DIR/../../frontend"
 ENV_FILE="$FRONTEND_DIR/.env"
 
 # Switch VITE_API_URL lines in-place ? only touches those three lines,
