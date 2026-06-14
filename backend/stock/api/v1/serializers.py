@@ -39,3 +39,24 @@ class StockOutSerializer(_BaseStockSerializer):
                 {"quantity": f"Only {product.quantity} unit(s) available."}
             )
         return attrs
+
+
+class StockTransactionSerializer(serializers.ModelSerializer):
+    product_name      = serializers.CharField(source="product.name", read_only=True)
+    product_sku       = serializers.CharField(source="product.sku",  read_only=True)
+    performed_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model  = StockMovement
+        fields = (
+            "id", "product", "product_name", "product_sku",
+            "movement_type", "quantity", "notes",
+            "performed_by", "performed_by_name", "created_at",
+        )
+        read_only_fields = fields
+
+    def get_performed_by_name(self, obj):
+        if not obj.performed_by:
+            return None
+        name = f"{obj.performed_by.first_name} {obj.performed_by.last_name}".strip()
+        return name or obj.performed_by.email
