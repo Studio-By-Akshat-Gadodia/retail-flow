@@ -1,11 +1,3 @@
-from rest_framework.response import Response
+from core.rest_framework.responses import APIResponse
 
-
-class APIResponse:
-    @staticmethod
-    def success(data=None, status_code=200):
-        return Response({"status": "success", "data": data}, status=status_code)
-
-    @staticmethod
-    def failed(data=None, status_code=400):
-        return Response({"status": "failed", "data": data}, status=status_code)
+__all__ = ['APIResponse']

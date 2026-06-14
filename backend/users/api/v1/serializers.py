@@ -6,8 +6,15 @@ from users.models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "email", "first_name", "last_name", "is_staff", "date_joined")
+        fields = (
+            "id", "email", "first_name", "last_name",
+            "avatar_url", "is_staff", "date_joined",
+        )
         read_only_fields = fields
+
+
+class GoogleAuthSerializer(serializers.Serializer):
+    id_token = serializers.CharField(required=True)
 
 
 class LoginSerializer(serializers.Serializer):

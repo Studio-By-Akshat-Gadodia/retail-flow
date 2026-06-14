@@ -11,6 +11,7 @@ import { useTheme, type Theme } from "@/features/settings/useTheme";
 import { ROUTES } from "@/config/routes";
 import Avatar from "@/shared/components/ui/Avatar";
 import StoreSwitcher from "@/features/stores/components/StoreSwitcher";
+import { OfflineBanner } from "@/shared/components/ui/OfflineBanner";
 
 /* ── Navigation definition ─────────────────────────────── */
 
@@ -164,6 +165,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="flex min-h-full bg-bg">
+      <OfflineBanner />
 
       {/* ── Desktop Sidebar ──────────────────────────────── */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:w-60 lg:flex-col border-r border-border bg-bg">

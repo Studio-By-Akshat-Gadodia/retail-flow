@@ -1,9 +1,10 @@
 import {
-  createContext, useContext, useState, useEffect,
+  createContext, useContext, useState, useMemo,
   ReactNode, useCallback,
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { storesApi } from "@/features/stores/api/storesApi";
+import { useMe } from "@/features/auth/hooks/useAuth";
 import { storage } from "@/lib/storage";
 import type { Store } from "@/features/stores/types";
 
@@ -19,27 +20,34 @@ const StoreContext = createContext<StoreContextValue | null>(null);
 
 export function StoreProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
+  const { isSuccess: isAuthenticated } = useMe();
 
   const { data: stores = [], isLoading } = useQuery<Store[]>({
     queryKey: ["stores"],
     queryFn:  storesApi.list,
-    enabled:  !!storage.getAccessToken(),
+    enabled:  isAuthenticated || !!storage.getAccessToken(),
     staleTime: 1000 * 60 * 5,
   });
 
-  const [currentStore, setCurrentStoreState] = useState<Store | null>(null);
+  // Track the explicitly chosen store ID (seeded from localStorage).
+  // currentStore is derived synchronously so RequireStore never sees a
+  // false-negative null between isLoading flipping to false and an effect firing.
+  const [chosenId, setChosenId] = useState<number | null>(
+    () => storage.getCurrentStoreId()
+  );
 
-  // Restore last-used store when the store list loads
-  useEffect(() => {
-    if (stores.length === 0) return;
-    const savedId = storage.getCurrentStoreId();
-    const match   = stores.find((s) => s.id === savedId);
-    setCurrentStoreState(match ?? stores[0]);
-  }, [stores]);
+  const currentStore = useMemo<Store | null>(() => {
+    if (stores.length === 0) return null;
+    if (chosenId !== null) {
+      const found = stores.find((s) => s.id === chosenId);
+      if (found) return found;
+    }
+    return stores[0];
+  }, [stores, chosenId]);
 
   const setCurrentStore = useCallback((store: Store) => {
     storage.setCurrentStoreId(store.id);
-    setCurrentStoreState(store);
+    setChosenId(store.id);
   }, []);
 
   const refetchStores = useCallback(() => {
