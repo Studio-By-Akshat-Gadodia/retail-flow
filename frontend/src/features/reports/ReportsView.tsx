@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { BarChart3, Download, TrendingDown } from "lucide-react";
 import { useStoreContext } from "@/features/stores/context/StoreContext";
-import { useSalesReport } from "@/features/reports/hooks/useReportsQuery";
+import { useSalesReport, useStockTrend } from "@/features/reports/hooks/useReportsQuery";
 import { exportReportCsv } from "@/features/reports/utils/exportCsv";
+import { SalesBarChart } from "@/features/reports/components/SalesBarChart";
+import { MovementTrendChart } from "@/features/reports/components/MovementTrendChart";
 import Button from "@/shared/components/ui/Button";
 import Input from "@/shared/components/ui/Input";
 import { Card, CardBody, StatCard } from "@/shared/components/ui/Card";
@@ -36,7 +38,15 @@ export default function ReportsView() {
       ? { store_id: currentStore.id, date_from: dateFrom, date_to: dateTo }
       : null;
 
-  const { data: report, isLoading, isError } = useSalesReport(params);
+  const reportQuery = useSalesReport(params);
+  const trendQuery  = useStockTrend(params);
+
+  const isLoading = reportQuery.isLoading || trendQuery.isLoading;
+  const isError   = (reportQuery.isError  || trendQuery.isError) && !isLoading;
+  const report    = reportQuery.data;
+  const trend     = trendQuery.data;
+
+  const hasData   = report && report.results.length > 0;
 
   if (!currentStore) return null;
 
@@ -50,7 +60,7 @@ export default function ReportsView() {
             Units sold (stock-out) per product over a date range
           </p>
         </div>
-        {report && report.results.length > 0 && (
+        {hasData && (
           <Button variant="secondary" size="sm" onClick={() => exportReportCsv(report)}>
             <Download className="h-4 w-4" />
             Export CSV
@@ -87,16 +97,20 @@ export default function ReportsView() {
 
       {/* Loading skeletons */}
       {isLoading && (
-        <div className="space-y-2">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="skeleton h-64 w-full rounded-lg" />
+            <div className="skeleton h-64 w-full rounded-lg" />
+          </div>
           <div className="skeleton h-20 w-full rounded-lg" />
-          {[...Array(4)].map((_, i) => (
+          {[...Array(3)].map((_, i) => (
             <div key={i} className="skeleton h-12 w-full rounded-lg" />
           ))}
         </div>
       )}
 
       {/* Error */}
-      {isError && !isLoading && (
+      {isError && (
         <Card>
           <CardBody className="py-8 text-center">
             <p className="text-sm text-danger">Failed to load report. Please try again.</p>
@@ -105,15 +119,25 @@ export default function ReportsView() {
       )}
 
       {/* Results */}
-      {!isLoading && !isError && report && (
+      {!isLoading && !isError && report && trend && (
         <div className="space-y-4">
+          {/* Charts */}
+          {(hasData || trend.results.length > 0) && (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {hasData && <SalesBarChart data={report.results} />}
+              {trend.results.length > 0 && <MovementTrendChart data={trend.results} />}
+            </div>
+          )}
+
+          {/* Stat */}
           <StatCard
             label="Total units sold"
             value={formatNumber(report.total_quantity_sold)}
             icon={<TrendingDown className="h-4 w-4" />}
           />
 
-          {report.results.length === 0 ? (
+          {/* Table */}
+          {!hasData ? (
             <EmptyState
               icon={BarChart3}
               title="No sales in this period"

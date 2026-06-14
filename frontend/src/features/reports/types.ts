@@ -11,3 +11,13 @@ export type SalesReport = {
   total_quantity_sold: number;
   results:             SalesReportRow[];
 };
+
+export type TrendPoint = {
+  date:      string; // "YYYY-MM-DD"
+  stock_in:  number;
+  stock_out: number;
+};
+
+export type StockTrend = {
+  results: TrendPoint[];
+};
