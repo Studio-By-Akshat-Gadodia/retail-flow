@@ -152,3 +152,4 @@ Frontend (features/settings, pages/SettingsPage):
 
 -----
 User need to add product variants
+Creat Authorization (Roles)
