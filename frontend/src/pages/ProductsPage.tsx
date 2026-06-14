@@ -18,6 +18,7 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-fg">Products</h1>
@@ -31,23 +32,25 @@ export default function ProductsPage() {
         </Button>
       </div>
 
+      {/* Loading skeletons */}
       {isLoading && (
         <div className="space-y-2">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="skeleton h-20 w-full rounded-lg" />
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="skeleton h-14 w-full rounded-lg" />
           ))}
         </div>
       )}
 
+      {/* Empty state */}
       {!isLoading && products.length === 0 && (
         <Card>
-          <CardBody className="py-12 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent-soft">
-              <Package className="h-6 w-6 text-accent" />
+          <CardBody className="py-16 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-soft">
+              <Package className="h-7 w-7 text-accent" />
             </div>
-            <h2 className="text-sm font-semibold text-fg">No products yet</h2>
-            <p className="mt-1 text-sm text-muted">
-              Add your first product to start building your catalog.
+            <h2 className="text-base font-semibold text-fg">No products yet</h2>
+            <p className="mt-1.5 text-sm text-muted max-w-xs mx-auto">
+              Your catalog is empty. Add your first product to start tracking inventory.
             </p>
             <Button className="mt-6" onClick={() => setAddOpen(true)}>
               <Plus className="h-4 w-4" />
@@ -57,36 +60,70 @@ export default function ProductsPage() {
         </Card>
       )}
 
+      {/* Product table */}
       {!isLoading && products.length > 0 && (
-        <div className="space-y-2">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="flex items-center gap-4 rounded-lg border border-border bg-bg px-4 py-3 shadow-card"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-2">
-                <Package className="h-5 w-5 text-muted" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-medium text-fg">{product.name}</p>
-                  {product.quantity <= product.reorder_level && (
-                    <Badge tone="danger">Low stock</Badge>
-                  )}
-                </div>
-                <p className="mt-0.5 text-xs text-muted">
-                  SKU: {product.sku} · {product.category}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-semibold text-fg">
-                  ${parseFloat(product.unit_price).toFixed(2)}
-                </p>
-                <p className="mt-0.5 text-xs text-muted">Qty: {product.quantity}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <Card>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border text-left">
+                  <th className="px-4 py-3 text-xs font-medium text-muted uppercase tracking-wide">
+                    Name
+                  </th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted uppercase tracking-wide">
+                    SKU
+                  </th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted uppercase tracking-wide">
+                    Category
+                  </th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted uppercase tracking-wide text-right">
+                    Qty
+                  </th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted uppercase tracking-wide text-right">
+                    Reorder at
+                  </th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted uppercase tracking-wide">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {products.map((product) => {
+                  const isLow = product.quantity <= product.reorder_level;
+                  return (
+                    <tr
+                      key={product.id}
+                      className="hover:bg-surface transition-colors"
+                    >
+                      <td className="px-4 py-3 font-medium text-fg">
+                        {product.name}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs text-muted">
+                        {product.sku}
+                      </td>
+                      <td className="px-4 py-3 text-muted">
+                        {product.category}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular text-fg">
+                        {product.quantity}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular text-muted">
+                        {product.reorder_level}
+                      </td>
+                      <td className="px-4 py-3">
+                        {isLow ? (
+                          <Badge tone="danger">Low stock</Badge>
+                        ) : (
+                          <Badge tone="success">In stock</Badge>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       )}
 
       <Dialog open={addOpen} onClose={() => setAddOpen(false)} title="Add a product">
