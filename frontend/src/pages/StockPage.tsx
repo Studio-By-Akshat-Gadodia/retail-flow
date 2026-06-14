@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, ArrowDownToLine, ArrowUpFromLine, Package } from "lucide-react";
+import { AlertTriangle, ArrowDownToLine, ArrowUpFromLine, CheckCircle2, Package } from "lucide-react";
 import { useStoreContext } from "@/features/stores/context/StoreContext";
 import { useProducts } from "@/features/products/hooks/useProducts";
 import Button from "@/shared/components/ui/Button";
@@ -8,11 +8,15 @@ import Badge from "@/shared/components/ui/Badge";
 import Dialog from "@/shared/components/ui/Dialog";
 import StockInForm from "@/features/inventory/components/StockInForm";
 import StockOutForm from "@/features/inventory/components/StockOutForm";
+import { cn } from "@/shared/utils/cn";
+
+type StockView = "all" | "low";
 
 export default function StockPage() {
   const { currentStore } = useStoreContext();
   const [stockInOpen,  setStockInOpen]  = useState(false);
   const [stockOutOpen, setStockOutOpen] = useState(false);
+  const [view, setView] = useState<StockView>("all");
 
   const { data: products = [], isLoading } = useProducts(currentStore?.id ?? 0);
 
@@ -20,6 +24,8 @@ export default function StockPage() {
     () => products.filter((p) => p.is_low_stock),
     [products],
   );
+
+  const displayed = view === "low" ? lowStockProducts : products;
 
   if (!currentStore) return null;
 
@@ -54,33 +60,105 @@ export default function StockPage() {
         </div>
       )}
 
-      {/* Low-stock summary panel */}
-      {!isLoading && lowStockProducts.length > 0 && (
-        <div className="rounded-xl border border-danger/30 bg-danger-soft p-4">
-          <div className="mb-3 flex items-center gap-2">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-danger" />
-            <p className="text-sm font-semibold text-danger">
-              {lowStockProducts.length} product{lowStockProducts.length !== 1 ? "s" : ""} need restocking
-            </p>
-          </div>
-          <div className="space-y-2">
-            {lowStockProducts.map((product) => (
-              <div key={product.id} className="flex items-center justify-between rounded-lg bg-bg px-3 py-2">
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-fg">{product.name}</p>
-                  <p className="text-xs text-muted">SKU: {product.sku}</p>
-                </div>
-                <div className="ml-4 text-right shrink-0">
-                  <p className="text-sm font-semibold text-danger">{product.quantity}</p>
-                  <p className="text-xs text-muted">reorder at {product.reorder_level}</p>
-                </div>
-              </div>
+      {!isLoading && products.length > 0 && (
+        <>
+          {/* Low-stock alert banner */}
+          {lowStockProducts.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setView(v => v === "low" ? "all" : "low")}
+              className="flex w-full items-center gap-3 rounded-xl border border-danger/30 bg-danger-soft px-4 py-3 text-left transition-colors hover:bg-danger/10"
+            >
+              <AlertTriangle className="h-4 w-4 shrink-0 text-danger" />
+              <p className="flex-1 text-sm font-semibold text-danger">
+                {lowStockProducts.length} product{lowStockProducts.length !== 1 ? "s" : ""} need restocking
+              </p>
+              <span className="text-xs font-medium text-danger underline underline-offset-2">
+                {view === "low" ? "Show all" : "View only"}
+              </span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 rounded-xl border border-success/30 bg-success-soft px-4 py-3">
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
+              <p className="text-sm font-medium text-success">All products are above their reorder level</p>
+            </div>
+          )}
+
+          {/* Filter toggle */}
+          <div className="flex gap-1 rounded-lg border border-border bg-surface p-1 w-fit">
+            {(["all", "low"] as StockView[]).map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setView(v)}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                  view === v
+                    ? "bg-bg shadow-card text-fg"
+                    : "text-muted hover:text-fg"
+                )}
+              >
+                {v === "all"
+                  ? `All (${products.length})`
+                  : `Low stock (${lowStockProducts.length})`}
+              </button>
             ))}
           </div>
-        </div>
+
+          {/* Stock list */}
+          {displayed.length === 0 ? (
+            <Card>
+              <CardBody className="py-10 text-center">
+                <CheckCircle2 className="mx-auto mb-3 h-8 w-8 text-success" />
+                <p className="text-sm font-semibold text-fg">No low-stock products</p>
+                <p className="mt-1 text-sm text-muted">Every item is above its reorder level.</p>
+              </CardBody>
+            </Card>
+          ) : (
+            <div className="space-y-2">
+              {displayed.map((product) => (
+                <div
+                  key={product.id}
+                  className={cn(
+                    "flex items-center gap-4 rounded-lg border bg-bg px-4 py-3 shadow-card",
+                    product.is_low_stock ? "border-danger/30" : "border-border",
+                  )}
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-2">
+                    <Package className="h-5 w-5 text-muted" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-medium text-fg">{product.name}</p>
+                      {product.is_low_stock && (
+                        <Badge tone="danger">Low stock</Badge>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted">
+                      SKU: {product.sku} · {product.category}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className={cn(
+                      "text-sm font-semibold",
+                      product.is_low_stock ? "text-danger" : "text-fg",
+                    )}>
+                      {product.quantity}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted">
+                      {product.is_low_stock
+                        ? `reorder at ${product.reorder_level}`
+                        : "in stock"}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
 
-      {/* Empty state */}
+      {/* Empty catalog state */}
       {!isLoading && products.length === 0 && (
         <Card>
           <CardBody className="py-12 text-center">
@@ -93,37 +171,6 @@ export default function StockPage() {
             </p>
           </CardBody>
         </Card>
-      )}
-
-      {/* Stock list */}
-      {!isLoading && products.length > 0 && (
-        <div className="space-y-2">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className="flex items-center gap-4 rounded-lg border border-border bg-bg px-4 py-3 shadow-card"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-2">
-                <Package className="h-5 w-5 text-muted" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-medium text-fg">{product.name}</p>
-                  {product.is_low_stock && (
-                    <Badge tone="danger">Low stock</Badge>
-                  )}
-                </div>
-                <p className="mt-0.5 text-xs text-muted">
-                  SKU: {product.sku} · {product.category}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-semibold text-fg">{product.quantity}</p>
-                <p className="mt-0.5 text-xs text-muted">in stock</p>
-              </div>
-            </div>
-          ))}
-        </div>
       )}
 
       {/* Stock-in dialog */}

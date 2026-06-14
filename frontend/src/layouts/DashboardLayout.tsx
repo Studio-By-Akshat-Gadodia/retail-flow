@@ -12,6 +12,8 @@ import { ROUTES } from "@/config/routes";
 import Avatar from "@/shared/components/ui/Avatar";
 import StoreSwitcher from "@/features/stores/components/StoreSwitcher";
 import { OfflineBanner } from "@/shared/components/ui/OfflineBanner";
+import { useStoreContext } from "@/features/stores/context/StoreContext";
+import { useLowStockCount } from "@/features/products/hooks/useProducts";
 
 /* ── Navigation definition ─────────────────────────────── */
 
@@ -42,10 +44,10 @@ const PAGE_TITLES: Record<string, string> = {
 /* ── Sub-components ─────────────────────────────────────── */
 
 function SidebarNavItem({
-  to, label, icon: Icon, end, onClick,
+  to, label, icon: Icon, end, onClick, badge,
 }: {
   to: string; label: string; icon: React.ElementType;
-  end?: boolean; onClick?: () => void;
+  end?: boolean; onClick?: () => void; badge?: number;
 }) {
   return (
     <NavLink
@@ -64,7 +66,12 @@ function SidebarNavItem({
       {({ isActive }) => (
         <>
           <Icon className={cn("h-4 w-4 shrink-0", isActive ? "stroke-2" : "stroke-[1.5]")} />
-          <span>{label}</span>
+          <span className="flex-1">{label}</span>
+          {!!badge && (
+            <span className="ml-auto inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-semibold text-white">
+              {badge > 99 ? "99+" : badge}
+            </span>
+          )}
         </>
       )}
     </NavLink>
@@ -159,6 +166,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const logout = useLogout();
   const location = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
+  const { currentStore } = useStoreContext();
+  const lowStockCount = useLowStockCount(currentStore?.id ?? 0);
 
   const pageTitle = PAGE_TITLES[location.pathname] ?? "RetailFlow";
   const fullName = user ? `${user.first_name} ${user.last_name}`.trim() : "";
@@ -182,7 +191,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Navigation */}
         <nav className="no-scrollbar flex-1 overflow-y-auto p-2 space-y-0.5">
           {NAV.map(item => (
-            <SidebarNavItem key={item.to} {...item} end={item.to === ROUTES.DASHBOARD} />
+            <SidebarNavItem
+              key={item.to}
+              {...item}
+              end={item.to === ROUTES.DASHBOARD}
+              badge={item.to === ROUTES.STOCK ? lowStockCount : undefined}
+            />
           ))}
         </nav>
 
@@ -247,7 +261,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   {isActive && (
                     <span className="absolute top-0 h-0.5 w-8 rounded-full bg-fg" />
                   )}
-                  <Icon className={cn("h-5 w-5", isActive ? "stroke-2" : "stroke-[1.5]")} />
+                  <span className="relative">
+                    <Icon className={cn("h-5 w-5", isActive ? "stroke-2" : "stroke-[1.5]")} />
+                    {to === ROUTES.STOCK && !!lowStockCount && (
+                      <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-danger" />
+                    )}
+                  </span>
                   <span className="truncate">{label}</span>
                 </>
               )}
