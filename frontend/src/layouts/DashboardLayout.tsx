@@ -182,7 +182,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Brand + Store switcher */}
         <div className="shrink-0 border-b border-border px-3 py-3 space-y-2">
           <div className="flex items-center gap-2.5 px-1">
-            <img src="/icons/icon.svg" alt="RetailFlow" className="h-6 w-6 rounded-md" />
+            <img src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="RetailFlow" className="h-6 w-6 rounded-md" />
             <span className="text-xs font-semibold text-muted uppercase tracking-wider">RetailFlow</span>
           </div>
           <StoreSwitcher />
@@ -229,7 +229,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* Mobile sticky header */}
         <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b border-border bg-bg/90 px-4 backdrop-blur lg:hidden">
           <div className="flex items-center gap-2.5">
-            <img src="/icons/icon.svg" alt="" className="h-6 w-6 rounded-md" />
+            <img src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="" className="h-6 w-6 rounded-md" />
             <span className="text-sm font-semibold text-fg">{pageTitle}</span>
           </div>
           <div className="flex items-center gap-2">
