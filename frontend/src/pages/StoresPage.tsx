@@ -41,7 +41,7 @@ export default function StoresPage() {
 
         {/* Header */}
         <div className="mb-8 flex items-center gap-3">
-          <img src="/icons/icon.svg" alt="RetailFlow" className="h-10 w-10 rounded-xl" />
+          <img src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="RetailFlow" className="h-10 w-10 rounded-xl" />
           <div>
             <h1 className="text-lg font-semibold text-fg">RetailFlow</h1>
             <p className="text-sm text-muted">Choose a store to continue</p>
