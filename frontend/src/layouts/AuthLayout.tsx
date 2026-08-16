@@ -41,7 +41,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       {/* Top bar */}
       <header className="flex h-14 items-center justify-between px-6">
         <div className="flex items-center gap-2.5">
-          <img src="/icons/icon.svg" alt="RetailFlow" className="h-7 w-7 rounded-lg" />
+f          <img src={`${import.meta.env.BASE_URL}icons/icon.svg`} alt="RetailFlow" className="h-7 w-7 rounded-lg" />
           <span className="text-sm font-semibold text-fg">RetailFlow</span>
         </div>
         <ThemeToggle />

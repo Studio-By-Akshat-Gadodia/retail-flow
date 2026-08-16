@@ -151,5 +151,11 @@ Frontend (features/settings, pages/SettingsPage):
 
 
 -----
-User need to add product variants
-Creat Authorization (Roles)
+1) Product Variants Management
+    The system should allow users to create and manage multiple variants for a product, such as size, color, or other configurable attributes. Each variant should be maintained under the same product with its own details and inventory information.
+2) Role-Based Authorization
+    The system should provide role-based authorization, allowing administrators to define roles and assign permissions to users. Access to features and data should be controlled based on the assigned role.
+3) Category and Subcategory Management
+    The system should provide a dedicated Category Management page where users can create, edit, and organize both categories and subcategories. Categories and subcategories should be managed from a single interface without requiring separate pages.
+
+Create celery service
