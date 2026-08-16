@@ -1,8 +1,13 @@
 from django.urls import path
-from stock.api.v1.views import StockInView, StockOutView, StockTransactionHistoryView
+from stock.api.v1.views import (
+    StockInView, StockOutView,
+    StockTransactionHistoryView, SalesReportView, StockTrendView,
+)
 
 urlpatterns = [
-    path("in/",      StockInView.as_view(),               name="stock-in"),
-    path("out/",     StockOutView.as_view(),              name="stock-out"),
+    path("in/",      StockInView.as_view(),                name="stock-in"),
+    path("out/",     StockOutView.as_view(),               name="stock-out"),
     path("history/", StockTransactionHistoryView.as_view(), name="stock-history"),
+    path("report/",  SalesReportView.as_view(),            name="stock-report"),
+    path("trend/",   StockTrendView.as_view(),             name="stock-trend"),
 ]
