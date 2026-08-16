@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "products",
     "stock",
     "suppliers",
+    "dashboard",
     "communication",
 ]
 
