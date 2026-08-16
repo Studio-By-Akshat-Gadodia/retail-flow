@@ -5,6 +5,8 @@ urlpatterns = [
     path("v1/users/",    include("users.api.v1.urls")),
     path("v1/stores/",   include("stores.api.v1.urls")),
     path("v1/products/", include("products.api.v1.urls")),
+    path("v1/stock/",     include("stock.api.v1.urls")),
+    path("v1/suppliers/", include("suppliers.api.v1.urls")),
     path("v1/stock/",    include("stock.api.v1.urls")),
     path("v1/dashboard/", include("dashboard.api.v1.urls")),
     # Swagger
