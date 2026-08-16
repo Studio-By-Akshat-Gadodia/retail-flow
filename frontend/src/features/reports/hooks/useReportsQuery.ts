@@ -8,3 +8,11 @@ export function useSalesReport(params: SalesReportParams | null) {
     enabled:  params !== null,
   });
 }
+
+export function useStockTrend(params: SalesReportParams | null) {
+  return useQuery({
+    queryKey: ["stock-trend", params],
+    queryFn:  () => reportsApi.getStockTrend(params!),
+    enabled:  params !== null,
+  });
+}
