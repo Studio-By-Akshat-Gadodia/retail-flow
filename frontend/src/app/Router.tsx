@@ -7,6 +7,7 @@ import StoresPage from "@/pages/StoresPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ProductsPage from "@/pages/ProductsPage";
 import StockPage from "@/pages/StockPage";
+import OverviewPage from "@/pages/OverviewPage";
 import DashboardLayout from "@/layouts/DashboardLayout";
 
 /* ── Guards ───────────────────────────────────────────── */
@@ -42,7 +43,7 @@ function AppShell() {
       <RequireStore>
         <DashboardLayout>
           <Routes>
-            <Route path={ROUTES.DASHBOARD} element={<Soon title="Overview" />} />
+            <Route path={ROUTES.DASHBOARD} element={<OverviewPage />} />
             <Route path={ROUTES.PRODUCTS}  element={<ProductsPage />} />
             <Route path={ROUTES.STOCK}     element={<StockPage />} />
             <Route path={ROUTES.SUPPLIERS} element={<Soon title="Suppliers" />} />
