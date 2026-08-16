@@ -2006,7 +2006,7 @@ const P = {
 }, Qe = "rf-stock-sync";
 he();
 self.skipWaiting();
-ke([{"revision":"c73b515fa05a0cf307bb4a9501576619","url":"offline.html"},{"revision":"548607e8dc5b1374dbef8d62bd185cc4","url":"index.html"},{"revision":"32cff8f0a1eb5d5788eed610ff69ed9a","url":"icons/icon.svg"},{"revision":null,"url":"assets/workbox-window.prod.es5-BqEJf4Xk.js"},{"revision":null,"url":"assets/index-UDjGpmC8.js"},{"revision":null,"url":"assets/index-Cxrc7JkW.css"},{"revision":"32cff8f0a1eb5d5788eed610ff69ed9a","url":"icons/icon.svg"},{"revision":"63f9afefe831e61c3b1da6644d651ddd","url":"manifest.webmanifest"}]);
+ke([{"revision":"c73b515fa05a0cf307bb4a9501576619","url":"offline.html"},{"revision":"221128f33510056b91e8ffef7e38ce8e","url":"index.html"},{"revision":"32cff8f0a1eb5d5788eed610ff69ed9a","url":"icons/icon.svg"},{"revision":null,"url":"assets/workbox-window.prod.es5-BqEJf4Xk.js"},{"revision":null,"url":"assets/index-DNEIms51.css"},{"revision":null,"url":"assets/index-D-mPbwfy.js"},{"revision":"32cff8f0a1eb5d5788eed610ff69ed9a","url":"icons/icon.svg"},{"revision":"63f9afefe831e61c3b1da6644d651ddd","url":"manifest.webmanifest"}]);
 E(
   ({ url: n }) => n.pathname.startsWith("/api/"),
   new M({ cacheName: P.API })
