@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Q
+from django.db.models.functions import Lower
 
 
 class Product(models.Model):
@@ -21,7 +23,17 @@ class Product(models.Model):
 
     class Meta:
         ordering = ["name"]
-        unique_together = [("store", "sku")]
+        constraints = [
+            # SKUs are barcode / hand-typed identifiers, so case must not create a
+            # distinct record. Scoped to active products so a soft-deleted SKU can
+            # be reused — the same rule the API serializers enforce.
+            models.UniqueConstraint(
+                Lower("sku"),
+                "store",
+                condition=Q(is_active=True),
+                name="uniq_active_sku_per_store_ci",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.sku})"

@@ -27,15 +27,16 @@ class CreateProductSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model  = Product
-        fields = ("store_id", "name", "sku", "category", "quantity", "unit_price", "reorder_level")
+        model      = Product
+        fields     = ("store_id", "name", "sku", "category", "quantity", "unit_price", "reorder_level")
+        validators = []  # SKU uniqueness checked manually — case-insensitive, active products only
 
     def validate(self, attrs):
         store = attrs["store"]
         user  = self.context["request"].user
         if not StoreMember.objects.filter(store=store, user=user).exists():
             raise serializers.ValidationError({"store_id": "You are not a member of this store."})
-        if Product.objects.filter(store=store, sku=attrs.get("sku"), is_active=True).exists():
+        if Product.objects.filter(store=store, sku__iexact=attrs.get("sku"), is_active=True).exists():
             raise serializers.ValidationError({"sku": "A product with this SKU already exists in this store."})
         return attrs
 
@@ -49,7 +50,7 @@ class UpdateProductSerializer(serializers.ModelSerializer):
         fields = ("name", "sku", "category", "quantity", "unit_price", "reorder_level")
 
     def validate_sku(self, value):
-        qs = Product.objects.filter(store=self.instance.store, sku=value, is_active=True)
+        qs = Product.objects.filter(store=self.instance.store, sku__iexact=value, is_active=True)
         if self.instance:
             qs = qs.exclude(pk=self.instance.pk)
         if qs.exists():
