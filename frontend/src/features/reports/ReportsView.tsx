@@ -33,8 +33,12 @@ export default function ReportsView() {
   const [dateFrom, setDateFrom] = useState(defaultDateFrom);
   const [dateTo,   setDateTo]   = useState(defaultDateTo);
 
+  // The native date inputs constrain the picker but not typed/pasted values, so
+  // guard the inverted range here too — the API rejects it with a 400.
+  const isRangeInverted = Boolean(dateFrom && dateTo && dateFrom > dateTo);
+
   const params =
-    currentStore && dateFrom && dateTo
+    currentStore && dateFrom && dateTo && !isRangeInverted
       ? { store_id: currentStore.id, date_from: dateFrom, date_to: dateTo }
       : null;
 
@@ -78,6 +82,7 @@ export default function ReportsView() {
                 type="date"
                 value={dateFrom}
                 max={dateTo || defaultDateTo()}
+                error={isRangeInverted ? "From date must be on or before the To date." : undefined}
                 onChange={(e) => setDateFrom(e.target.value)}
               />
             </div>
