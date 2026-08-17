@@ -1,3 +1,6 @@
+from decimal import Decimal
+
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
@@ -7,7 +10,11 @@ class Product(models.Model):
     sku           = models.CharField(max_length=100)
     category      = models.CharField(max_length=100)
     quantity      = models.PositiveIntegerField(default=0)
-    unit_price    = models.DecimalField(max_digits=12, decimal_places=2)
+    unit_price    = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
     reorder_level = models.PositiveIntegerField(default=0)
     is_active     = models.BooleanField(default=True)
     created_by    = models.ForeignKey(
