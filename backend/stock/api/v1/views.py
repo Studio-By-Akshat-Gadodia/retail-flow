@@ -19,6 +19,44 @@ from stock.api.v1.serializers import (
 )
 
 
+def _validate_report_query(request):
+    """
+    Validate the store_id / date_from / date_to query params shared by the report
+    endpoints. Returns ``(params, None)`` on success — where params is a
+    ``(store_id, date_from, date_to)`` tuple — or ``(None, error_response)``.
+    """
+    store_id  = request.query_params.get("store_id")
+    date_from = request.query_params.get("date_from")
+    date_to   = request.query_params.get("date_to")
+
+    errors = {}
+    if not store_id:  errors["store_id"]  = ["This field is required."]
+    if not date_from: errors["date_from"] = ["This field is required."]
+    if not date_to:   errors["date_to"]   = ["This field is required."]
+    if errors:
+        return None, APIResponse.failed(data=errors)
+
+    try:
+        parsed_from = date_type.fromisoformat(date_from)
+        parsed_to   = date_type.fromisoformat(date_to)
+    except ValueError:
+        return None, APIResponse.failed(
+            data={"detail": "date_from and date_to must be valid dates (YYYY-MM-DD)."}
+        )
+
+    # An inverted range would silently yield an empty report, indistinguishable
+    # from a genuinely empty period — reject it instead.
+    if parsed_from > parsed_to:
+        return None, APIResponse.failed(
+            data={"date_from": ["date_from must be on or before date_to."]}
+        )
+
+    if not StoreMember.objects.filter(store_id=store_id, user=request.user).exists():
+        return None, APIResponse.failed(data={"detail": "Not a member of this store."}, status_code=403)
+
+    return (store_id, date_from, date_to), None
+
+
 class StockInView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -97,27 +135,10 @@ class SalesReportView(APIView):
 
     @extend_schema(tags=["stock"])
     def get(self, request):
-        store_id  = request.query_params.get("store_id")
-        date_from = request.query_params.get("date_from")
-        date_to   = request.query_params.get("date_to")
-
-        errors = {}
-        if not store_id:  errors["store_id"]  = ["This field is required."]
-        if not date_from: errors["date_from"] = ["This field is required."]
-        if not date_to:   errors["date_to"]   = ["This field is required."]
-        if errors:
-            return APIResponse.failed(data=errors)
-
-        try:
-            date_type.fromisoformat(date_from)
-            date_type.fromisoformat(date_to)
-        except ValueError:
-            return APIResponse.failed(
-                data={"detail": "date_from and date_to must be valid dates (YYYY-MM-DD)."}
-            )
-
-        if not StoreMember.objects.filter(store_id=store_id, user=request.user).exists():
-            return APIResponse.failed(data={"detail": "Not a member of this store."}, status_code=403)
+        params, error = _validate_report_query(request)
+        if error:
+            return error
+        store_id, date_from, date_to = params
 
         rows = (
             StockMovement.objects
@@ -170,27 +191,10 @@ class StockTrendView(APIView):
 
     @extend_schema(tags=["stock"])
     def get(self, request):
-        store_id  = request.query_params.get("store_id")
-        date_from = request.query_params.get("date_from")
-        date_to   = request.query_params.get("date_to")
-
-        errors = {}
-        if not store_id:  errors["store_id"]  = ["This field is required."]
-        if not date_from: errors["date_from"] = ["This field is required."]
-        if not date_to:   errors["date_to"]   = ["This field is required."]
-        if errors:
-            return APIResponse.failed(data=errors)
-
-        try:
-            date_type.fromisoformat(date_from)
-            date_type.fromisoformat(date_to)
-        except ValueError:
-            return APIResponse.failed(
-                data={"detail": "date_from and date_to must be valid dates (YYYY-MM-DD)."}
-            )
-
-        if not StoreMember.objects.filter(store_id=store_id, user=request.user).exists():
-            return APIResponse.failed(data={"detail": "Not a member of this store."}, status_code=403)
+        params, error = _validate_report_query(request)
+        if error:
+            return error
+        store_id, date_from, date_to = params
 
         rows = (
             StockMovement.objects
