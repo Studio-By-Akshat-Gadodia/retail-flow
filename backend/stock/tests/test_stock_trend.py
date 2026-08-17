@@ -76,6 +76,12 @@ class TestStockTrendValidation:
         resp = client.get(URL, {"store_id": store.pk, "date_from": TODAY, "date_to": TODAY})
         assert resp.status_code == 403
 
+    def test_inverted_date_range_returns_400(self, db, client, user, member, store):
+        client.force_authenticate(user=user)
+        resp = client.get(URL, {"store_id": store.pk, "date_from": TODAY, "date_to": YESTERDAY})
+        assert resp.status_code == 400
+        assert "date_from" in resp.data["data"]
+
 
 # ── Data ──────────────────────────────────────────────────────────────────────
 
