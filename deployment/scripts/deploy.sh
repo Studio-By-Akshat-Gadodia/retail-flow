@@ -15,7 +15,7 @@ PREV_COMMIT=$(git rev-parse HEAD)
 echo "Current commit: $PREV_COMMIT"
 
 echo "Pulling latest code..."
-git pull origin release/prod
+sudo -u ubuntu git pull origin release/prod
 
 echo "Activating virtual environment..."
 source ./backend/.venv/bin/activate
@@ -35,7 +35,7 @@ if verify_service_health "$SERVICE_NAME" "$PORT"; then
     echo "Deployment completed successfully."
 else
     echo "❌ $SERVICE_NAME failed its health check. Rolling back to $PREV_COMMIT..."
-    git reset --hard "$PREV_COMMIT"
+    sudo -u ubuntu git reset --hard "$PREV_COMMIT"
     python backend/manage.py collectstatic --noinput
     sudo systemctl restart "$SERVICE_NAME"
 
