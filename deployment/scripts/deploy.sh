@@ -20,6 +20,9 @@ sudo -u ubuntu git pull origin release/prod
 echo "Activating virtual environment..."
 source ./backend/.venv/bin/activate
 
+echo "Installing/upgrading dependencies..."
+pip install -r backend/requirements.txt --quiet
+
 echo "Running migrations..."
 python backend/manage.py migrate
 
@@ -36,6 +39,7 @@ if verify_service_health "$SERVICE_NAME" "$PORT"; then
 else
     echo "❌ $SERVICE_NAME failed its health check. Rolling back to $PREV_COMMIT..."
     sudo -u ubuntu git reset --hard "$PREV_COMMIT"
+    pip install -r backend/requirements.txt --quiet
     python backend/manage.py collectstatic --noinput
     sudo systemctl restart "$SERVICE_NAME"
 
