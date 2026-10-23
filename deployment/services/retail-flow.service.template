@@ -10,7 +10,7 @@ WorkingDirectory={{WORKING_DIRECTORY_PATH}}
 
 ExecStart={{VIRTUAL_ENVIRONMENT_PATH}}/bin/gunicorn \
     retailflow.wsgi:application \
-    --bind 0.0.0.0:{{PORT}} \
+    --bind 127.0.0.1:{{PORT}} \
     --workers {{WORKERS}}
 
 Restart=always
